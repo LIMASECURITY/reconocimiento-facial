@@ -1023,33 +1023,30 @@ class FacialRecognitionDB:
         while True:
             print("\n🎯 MENÚ PRINCIPAL")
             print("1. 🔐 Verificar acceso")
-            print("2. 📊 Ver todos los datos de la base de datos")
-            print("3. 🌐 Abrir Panel Web de Administración")
-            print("4. 🔍 Buscar accesos de usuario")
-            print("5. 👥 Ver usuarios registrados")
-            print("6. 📄 Exportar reporte a texto")
-            print("7. 🚪 Salir")
+            print("2. 🌐 Abrir Panel Web de Administración")
+            print("3. 🔍 Buscar accesos de usuario")
+            print("4. 👥 Ver usuarios registrados")
+            print("5. 📄 Exportar reporte a texto")
+            print("6. 🚪 Salir")
             
             choice = input("Seleccione opción: ").strip()
             
             if choice == "1":
                 self.recognize_user()
             elif choice == "2":
-                self.show_database_data()
-            elif choice == "3":
                 self.open_web_admin()
-            elif choice == "4":
+            elif choice == "3":
                  self.search_user_access()      
-            elif choice == "5":
+            elif choice == "4":
                 print("\n👥 USUARIOS REGISTRADOS:")
                 if self.known_faces:
                     for user in self.known_faces.keys():
                         print(f"  👤 {user}")
                 else:
                     print("  No hay usuarios registrados")
-            elif choice == "6":
+            elif choice == "5":
                 self.export_to_text_file()
-            elif choice == "7":
+            elif choice == "6":
                 print("👋 ¡Hasta pronto!")
                 if self.db_connection:
                     self.db_connection.close()

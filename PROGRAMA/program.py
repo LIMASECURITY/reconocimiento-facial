@@ -800,8 +800,13 @@ class FacialRecognitionDB:
     def open_web_admin(self):
         """Abre el panel web de administración"""
         try:
+            # Crear carpeta web_admin si no existe
+            if not os.path.exists('web_admin'):
+                os.makedirs('web_admin')
+                print("📁 Carpeta web_admin creada")
+            
             # Crear archivo index.html si no existe
-            if not os.path.exists('index.html'):
+            if not os.path.exists('web_admin/index.html'):
                 # HTML básico como fallback
                 basic_html = """
                 <!DOCTYPE html>
@@ -813,11 +818,11 @@ class FacialRecognitionDB:
                 </head>
                 <body>
                     <h1>Panel de Administración</h1>
-                    <p>El archivo index.html no se encontró. Por favor, coloca tu HTML en index.html</p>
+                    <p>El archivo index.html no se encontró. Por favor, coloca tu HTML en web_admin/index.html</p>
                 </body>
                 </html>
                 """
-                with open('index.html', 'w', encoding='utf-8') as f:
+                with open('web_admin/index.html', 'w', encoding='utf-8') as f:
                     f.write(basic_html)
                 print("📄 Archivo index.html básico creado")
             

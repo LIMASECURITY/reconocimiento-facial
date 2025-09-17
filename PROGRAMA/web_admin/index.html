@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Admin - Reconocimiento Facial</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        .actions {
+            padding: 30px;
+            text-align: center;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            margin: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+            color: white;
+        }
+
+        .data-section {
+            padding: 30px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .dialog-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .dialog-options {
+            margin: 20px 0;
+        }
+
+        .dialog-options label {
+            display: block;
+            margin: 10px 0;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+
+        .dialog-confirm {
+            margin: 20px 0;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 8px;
+            border-left: 4px solid #ff9800;
+        }
+
+        .dialog-confirm input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .dialog-buttons {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .alert {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        @media (max-width: 768px) {
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .btn {
+                display: block;
+                margin: 10px auto;
+                width: 90%;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Panel de Administración</h1>
+            <p>Sistema de Reconocimiento Facial - Servidor Integrado</p>
+        </div>
+
+        <div id="alert-container"></div>
+
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="total-usuarios">0</div>
+                <div class="stat-label">👥 Usuarios Registrados</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-accesos">0</div>
+                <div class="stat-label">📊 Total de Accesos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="accesos-permitidos">0</div>
+                <div class="stat-label">✅ Accesos Permitidos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="accesos-denegados">0</div>
+                <div class="stat-label">❌ Accesos Denegados</div>
+            </div>
+        </div>
+
+        <div class="actions">
+            <button class="btn btn-primary" onclick="exportData()">💾 Exportar Datos CSV</button>
+            <button class="btn btn-danger" onclick="showCleanDialog()">🗑️ Limpiar Base de Datos</button>
+            <button class="btn btn-warning" onclick="refreshData()">🔄 Actualizar Datos</button>
+        </div>
+
+        <div class="data-section">
+            <h2>👥 Usuarios Registrados</h2>
+            <div class="table-container">
+                <table id="usuarios-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Fecha Registro</th>
+                            <th>Último Acceso</th>
+                            <th>Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" style="text-align: center;">Cargando datos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h2>⏰ Últimos 20 Accesos</h2>
+            <div class="table-container">
+                <table id="accesos-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha/Hora</th>
+                            <th>Usuario</th>
+                            <th>Tipo</th>
+                            <th>Similitud</th>
+                            <th>ID Usuario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" style="text-align: center;">Cargando datos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Diálogo de limpieza -->
+        <div id="clean-dialog" class="dialog">
+            <div class="dialog-content">
+                <h3>🗑️ Limpiar Base de Datos</h3>
+                
+                <div class="dialog-options">
+                    <label>
+                        <input type="radio" name="clean-type" value="accesos" checked>
+                        <strong>📋 Solo historial de accesos</strong><br>
+                        <small>Elimina todos los registros de accesos pero mantiene los usuarios</small>
+                    </label>
+                    <label>
+                        <input type="radio" name="clean-type" value="todo">
+                        <strong>🔥 Todos los datos (usuarios + accesos)</strong><br>
+                        <small>Elimina completamente toda la información del sistema</small>
+                    </label>
+                </div>
+
+                <div class="dialog-confirm">
+                    <p>⚠️ <strong>ACCIÓN IRREVERSIBLE</strong></p>
+                    <p>Ingrese la clave de MYSQL: </p>
+                     <input type="password" id="confirm-input" placeholder="Escriba la clave aquí">
+                </div>
+
+                <div class="dialog-buttons">
+                    <button class="btn btn-danger" onclick="cleanData()" style="margin-right: 10px;">
+                        🗑️ EJECUTAR LIMPIEZA
+                    </button>
+                    <button class="btn" onclick="hideCleanDialog()" style="background: #6c757d; color: white;">
+                        ✖️ Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+
+        
+    </div>
+
+    <script>
+        // Mostrar alerta
+        function showAlert(message, type) {
+            const alertContainer = document.getElementById('alert-container');
+            alertContainer.innerHTML = `
+                <div class="alert alert-${type}">
+                    ${message}
+                </div>
+            `;
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        // Cargar datos al iniciar
+        document.addEventListener('DOMContentLoaded', refreshData);
+
+        async function refreshData() {
+            try {
+                const response = await fetch('/data');
+                if (!response.ok) {
+                    throw new Error('Error al cargar datos');
+                }
+                
+                const data = await response.json();
+                
+                // Actualizar estadísticas
+                document.getElementById('total-usuarios').textContent = data.stats.total_usuarios;
+                document.getElementById('total-accesos').textContent = data.stats.total_accesos;
+                document.getElementById('accesos-permitidos').textContent = data.stats.accesos_permitidos;
+                document.getElementById('accesos-denegados').textContent = data.stats.accesos_denegados;
+                
+                // Actualizar tabla de usuarios
+                const usuariosTable = document.querySelector('#usuarios-table tbody');
+                if (data.usuarios.length === 0) {
+                    usuariosTable.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay usuarios registrados</td></tr>';
+                } else {
+                    usuariosTable.innerHTML = '';
+                    data.usuarios.forEach(user => {
+                        usuariosTable.innerHTML += `
+                            <tr>
+                                <td>${user.id}</td>
+                                <td><strong>${user.nombre}</strong></td>
+                                <td>${new Date(user.fecha_registro).toLocaleString()}</td>
+                                <td>${user.ultimo_acceso ? new Date(user.ultimo_acceso).toLocaleString() : 'Nunca'}</td>
+                                <td>${user.activo ? '✅ Activo' : '❌ Inactivo'}</td>
+                            </tr>
+                        `;
+                    });
+                }
+                
+                // Actualizar tabla de accesos
+                const accesosTable = document.querySelector('#accesos-table tbody');
+                if (data.accesos.length === 0) {
+                    accesosTable.innerHTML = '<tr><td colspan="5" style="text-align: center;">No hay registros de acceso</td></tr>';
+                } else {
+                    accesosTable.innerHTML = '';
+                    data.accesos.forEach(acceso => {
+                        accesosTable.innerHTML += `
+                            <tr>
+                                <td>${new Date(acceso.fecha_acceso).toLocaleString()}</td>
+                                <td><strong>${acceso.nombre_usuario}</strong></td>
+                                <td>
+                                    <span style="color: ${acceso.tipo_acceso === 'PERMITIDO' ? 'green' : 'red'}; 
+                                                font-weight: bold; padding: 4px 8px; border-radius: 4px;
+                                                background: ${acceso.tipo_acceso === 'PERMITIDO' ? '#d4edda' : '#f8d7da'}">
+                                        ${acceso.tipo_acceso}
+                                    </span>
+                                </td>
+                                <td>${acceso.similitud ? acceso.similitud.toFixed(3) : 'N/A'}</td>
+                                <td>${acceso.usuario_id || 'N/A'}</td>
+                            </tr>
+                        `;
+                    });
+                }
+                
+            
+                
+            } catch (error) {
+                showAlert('❌ Error cargando datos: ' + error.message, 'error');
+                console.error('Error:', error);
+            }
+        }
+
+        function exportData() {
+            window.open('/exportar', '_blank');
+            showAlert('📊 Exportando datos a CSV...', 'success');
+        }
+
+        function showCleanDialog() {
+            document.getElementById('clean-dialog').style.display = 'flex';
+            document.getElementById('confirm-input').value = '';
+        }
+
+        function hideCleanDialog() {
+            document.getElementById('clean-dialog').style.display = 'none';
+        }
+
+       async function cleanData() {
+        const tipo = document.querySelector('input[name="clean-type"]:checked').value;
+        const confirmacion = document.getElementById('confirm-input').value;
+        
+        if (confirmacion !== '123456798') {  // Cambiada la clave
+            showAlert('❌ Clave incorrecta', 'error');
+            return;
+        }
+        
+        if (!confirm('⚠️ ¿ESTÁS ABSOLUTAMENTE SEGURO?\n\nEsta acción NO se puede deshacer y eliminará permanentemente los datos.')) {
+            return;
+        }
+        
+        try {
+            const formData = new URLSearchParams();
+            formData.append('tipo', tipo);
+            formData.append('confirmacion', confirmacion);
+            
+            const response = await fetch('/limpiar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: formData
+            });
+            
+            if (response.ok) {
+                showAlert('✅ Base de datos limpiada correctamente', 'success');
+                refreshData();
+                hideCleanDialog();
+            } else {
+                const error = await response.text();
+                throw new Error(error);
+            }
+        } catch (error) {
+            showAlert('❌ Error limpiando base de datos: ' + error.message, 'error');
+            console.error('Error:', error);
+        }
+    }
+        // Actualizar automáticamente cada 30 segundos
+        setInterval(refreshData, 30000);
+    </script>
+</body>
+</html>
